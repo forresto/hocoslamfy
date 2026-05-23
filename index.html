@@ -301,6 +301,11 @@
       var boostBtn = document.getElementById("boost-btn");
       boostBtn.addEventListener("mousedown", startWasm);
       boostBtn.addEventListener("touchstart", startWasm, { passive: true });
+
+      const hs = window.localStorage.getItem("hocoslamfy_highscore");
+      if (hs) {
+        boostBtn.textContent = "HIGH SCORE: " + hs;
+      }
     </script>
   </body>
 </html>

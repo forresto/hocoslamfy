@@ -26,6 +26,14 @@
 #include "title.h"
 #include "bg.h"
 
+#if SDL_MAJOR_VERSION >= 2
+extern SDL_Window* Window;
+static inline int SDL_Flip(SDL_Surface* screen) {
+	(void)screen;
+	return SDL_UpdateWindowSurface(Window);
+}
+#endif
+
 typedef void (*TGatherInput) (bool* Continue);
 typedef void (*TDoLogic) (bool* Continue, bool* Error, Uint32 Milliseconds);
 typedef void (*TOutputFrame) (void);

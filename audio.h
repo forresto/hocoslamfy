@@ -30,5 +30,8 @@ extern void PlaySFXFly();
 extern void PlaySFXPass();
 extern void PlaySFXCollision();
 extern void PlaySFXHighScore();
+extern void SetMusicMuted(int muted);
+extern void SetSFXMuted(int muted);
 
 #endif /* !defined(_AUDIO_H_) */
+

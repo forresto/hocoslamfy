@@ -27,6 +27,9 @@
 #ifndef DONT_USE_PWD
 #include <pwd.h>
 #endif
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
 
 #include "SDL.h"
 
@@ -172,6 +175,10 @@ int MkDir(char *path)
 
 void SaveHighScore(uint32_t Score)
 {
+#ifdef __EMSCRIPTEN__
+	EM_ASM({ localStorage.setItem('hocoslamfy_highscore', $0); }, Score);
+	return;
+#endif
 	char path[256];
 #ifndef DONT_USE_PWD
 	struct passwd *pw = getpwuid(getuid());
@@ -213,6 +220,12 @@ void GetFileLine(char *str, uint32_t size, FILE *fp)
 
 uint32_t GetHighScore()
 {
+#ifdef __EMSCRIPTEN__
+	return (uint32_t)EM_ASM_INT({
+		var v = localStorage.getItem('hocoslamfy_highscore');
+		return v ? parseInt(v, 10) : 0;
+	});
+#endif
 	char path[256];
 #ifndef DONT_USE_PWD
 	struct passwd *pw = getpwuid(getuid());

@@ -73,13 +73,24 @@ static bool CheckImage(bool* Continue, bool* Error, const SDL_Surface* Image, co
 	}
 }
 
+#if SDL_MAJOR_VERSION >= 2
+SDL_Window* Window = NULL;
+#endif
+
 static SDL_Surface* ConvertSurface(bool* Continue, bool* Error, SDL_Surface* Source, const char* Name)
 {
 	SDL_Surface* Dest;
+#if SDL_MAJOR_VERSION >= 2
+	if (Source->format->Amask != 0)
+		Dest = SDL_ConvertSurfaceFormat(Source, SDL_PIXELFORMAT_ARGB8888, 0);
+	else
+		Dest = SDL_ConvertSurface(Source, SDL_GetWindowSurface(Window)->format, 0);
+#else
 	if (Source->format->Amask != 0)
 		Dest = SDL_DisplayFormatAlpha(Source);
 	else
 		Dest = SDL_DisplayFormat(Source);
+#endif
 	if (Dest == NULL)
 	{
 		*Continue = false;  *Error = true;
@@ -108,6 +119,30 @@ void Initialize(bool* Continue, bool* Error)
 	SDL_Surface* WindowIcon = LoadImage("hocoslamfy.png");
 	if (!CheckImage(Continue, Error, WindowIcon, "hocoslamfy.png"))
 		return;
+
+#if SDL_MAJOR_VERSION >= 2
+	Window = SDL_CreateWindow("hocoslamfy",
+		SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+		SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+	if (Window == NULL)
+	{
+		*Continue = false;  *Error = true;
+		printf("SDL_CreateWindow failed: %s\n", SDL_GetError());
+		SDL_ClearError();
+		return;
+	}
+	else
+		printf("SDL_CreateWindow succeeded\n");
+	SDL_SetWindowIcon(Window, WindowIcon);
+	Screen = SDL_GetWindowSurface(Window);
+	if (Screen == NULL)
+	{
+		*Continue = false;  *Error = true;
+		printf("SDL_GetWindowSurface failed: %s\n", SDL_GetError());
+		SDL_ClearError();
+		return;
+	}
+#else
 	SDL_WM_SetIcon(WindowIcon, NULL);
 	SDL_WM_SetCaption("hocoslamfy", "hocoslamfy");
 
@@ -128,6 +163,7 @@ void Initialize(bool* Continue, bool* Error)
 	}
 	else
 		printf("SDL_SetVideoMode succeeded\n");
+#endif
 
 	SDL_ShowCursor(0);
 
@@ -205,5 +241,9 @@ void Finalize()
 	ColumnImage = NULL;
 	SDL_FreeSurface(GameOverFrame);
 	GameOverFrame = NULL;
+#if SDL_MAJOR_VERSION >= 2
+	SDL_DestroyWindow(Window);
+	Window = NULL;
+#endif
 	SDL_Quit();
 }

@@ -26,6 +26,7 @@
 #include "init.h"
 
 static bool       SND_Available = false;
+static bool       SFX_Muted    = false;
 
 static Mix_Music* BGM           = NULL;
 
@@ -59,19 +60,19 @@ bool InitializeAudio()
 
 	if (SND_Available)
 	{
-		BGM = Mix_LoadMUS(DATA_PATH "bgm.wav");
+		BGM = Mix_LoadMUS(DATA_PATH "bgm.ogg");
 		if (BGM == NULL)
 		{
-			printf("%s: Mix_LoadMUS failed: %s\n", DATA_PATH "bgm.wav", Mix_GetError());
+			printf("%s: Mix_LoadMUS failed: %s\n", DATA_PATH "bgm.ogg", Mix_GetError());
 			return false;
 		}
 		else
-			printf("Successfully loaded %s\n", DATA_PATH "bgm.wav");
+			printf("Successfully loaded %s\n", DATA_PATH "bgm.ogg");
 
-		SFX_Fly       = LoadSFX(DATA_PATH "fly.wav");
-		SFX_Pass      = LoadSFX(DATA_PATH "pass.wav");
-		SFX_Collision = LoadSFX(DATA_PATH "collision.wav");
-		SFX_HighScore = LoadSFX(DATA_PATH "highscore.wav");
+		SFX_Fly       = LoadSFX(DATA_PATH "fly.ogg");
+		SFX_Pass      = LoadSFX(DATA_PATH "pass.ogg");
+		SFX_Collision = LoadSFX(DATA_PATH "collision.ogg");
+		SFX_HighScore = LoadSFX(DATA_PATH "highscore.ogg");
 	}
 
 	return true;
@@ -108,12 +109,23 @@ void StopBGM()
 	}
 }
 
+void SetMusicMuted(int muted)
+{
+	if (SND_Available)
+		Mix_VolumeMusic(muted ? 0 : MIX_MAX_VOLUME);
+}
+
+void SetSFXMuted(int muted)
+{
+	SFX_Muted = muted ? true : false;
+}
+
 // In all of the below functions, -1 as parameter #1 means "don't care which
 // SDL_mixer channel gets used to play this sound effect", and 0 as parameter
 // #3 means "when done, loop 0 times".
 void PlaySFXFly()
 {
-	if (SND_Available)
+	if (SND_Available && !SFX_Muted)
 	{
 		Mix_PlayChannel(-1, SFX_Fly, 0);
 	}
@@ -121,7 +133,7 @@ void PlaySFXFly()
 
 void PlaySFXPass()
 {
-	if (SND_Available)
+	if (SND_Available && !SFX_Muted)
 	{
 		Mix_PlayChannel(-1, SFX_Pass, 0);
 	}
@@ -129,7 +141,7 @@ void PlaySFXPass()
 
 void PlaySFXCollision()
 {
-	if (SND_Available)
+	if (SND_Available && !SFX_Muted)
 	{
 		Mix_PlayChannel(-1, SFX_Collision, 0);
 	}
@@ -137,7 +149,7 @@ void PlaySFXCollision()
 
 void PlaySFXHighScore()
 {
-	if (SND_Available)
+	if (SND_Available && !SFX_Muted)
 	{
 		Mix_PlayChannel(-1, SFX_HighScore, 0);
 	}

@@ -22,10 +22,16 @@
 
 #include "SDL.h"
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
 #include "main.h"
 #include "init.h"
+#include "audio.h"
 #include "platform.h"
 #include "SDL_image.h"
+#include "SDL_mixer.h"
 
 static bool         Continue                             = true;
 static bool         Error                                = false;
@@ -42,9 +48,49 @@ static bool         Error                                = false;
        TDoLogic     DoLogic;
        TOutputFrame OutputFrame;
 
+#ifdef __EMSCRIPTEN__
+static Uint32 em_last_ticks = 0;
+
+static void em_loop(void) {
+	Uint32 now = SDL_GetTicks();
+	Uint32 duration = em_last_ticks ? (now - em_last_ticks) : 16;
+	if (duration == 0) duration = 1;
+	em_last_ticks = now;
+
+	GatherInput(&Continue);
+	if (!Continue) { emscripten_cancel_main_loop(); return; }
+	DoLogic(&Continue, &Error, duration);
+	if (!Continue) { emscripten_cancel_main_loop(); return; }
+	OutputFrame();
+}
+
+EMSCRIPTEN_KEEPALIVE void TriggerBoostDown(void) {
+	SDL_Event e;
+	SDL_zero(e);
+	e.type = SDL_KEYDOWN;
+	e.key.state = SDL_PRESSED;
+	e.key.keysym.sym = SDLK_SPACE;
+	SDL_PushEvent(&e);
+}
+
+EMSCRIPTEN_KEEPALIVE void TriggerBoostUp(void) {
+	SDL_Event e;
+	SDL_zero(e);
+	e.type = SDL_KEYUP;
+	e.key.state = SDL_RELEASED;
+	e.key.keysym.sym = SDLK_SPACE;
+	SDL_PushEvent(&e);
+}
+
+#endif
+
 int main(int argc, char* argv[])
 {
 	Initialize(&Continue, &Error);
+#ifdef __EMSCRIPTEN__
+	SetMusicMuted(1);
+	emscripten_set_main_loop(em_loop, 0, 1);
+#else
 	Uint32 Duration = 16;
 	while (Continue)
 	{
@@ -59,4 +105,5 @@ int main(int argc, char* argv[])
 	}
 	Finalize();
 	return Error ? 1 : 0;
+#endif
 }

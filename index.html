@@ -3,7 +3,13 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-    <title>Hocoslamfy</title>
+    <title>Hocoslamfy 🐝 wasm (web version)</title>
+    <link rel="icon" type="image/png" href="./data/hocoslamfy.png" />
+    <meta property="og:image" content="./data-src/hocoslamfy-start-screen.png" />
+    <meta
+      property="description"
+      content="You are a small bee and you must fly to avoid the bamboo shoots! Original by Nebuleon. Now on the web."
+    />
     <style>
       * {
         box-sizing: border-box;
@@ -127,11 +133,11 @@
     </style>
   </head>
   <body>
-    <canvas id="canvas"></canvas>
+    <canvas id="canvas" width="320" height="240"></canvas>
 
     <div id="controls">
-      <button id="boost-btn">TAP TO FLY</button>
-      <div id="meta">
+      <button id="boost-btn">LOAD GAME</button>
+      <div id="meta" style="display: none">
         <div class="btn-group" id="music-group">
           <button data-val="0" class="active">Music: OFF</button>
           <button data-val="1">Music: ON</button>
@@ -151,7 +157,7 @@
       </div>
     </div>
 
-    <div id="status">Loading...</div>
+    <div id="status"></div>
 
     <script>
       var Module = {
@@ -261,6 +267,40 @@
         true,
       );
     </script>
-    <script src="hocoslamfy.js"></script>
+    <script>
+      var splashImg = new Image();
+      splashImg.src = "data-src/hocoslamfy-start-screen.png";
+      splashImg.onload = function () {
+        var ctx = document.getElementById("canvas").getContext("2d");
+        ctx.drawImage(splashImg, 0, 0, 320, 240);
+      };
+
+      var wasmLoaded = false;
+      function startWasm() {
+        if (wasmLoaded) return;
+        wasmLoaded = true;
+        document.getElementById("meta").style.display = "flex";
+        var s = document.createElement("script");
+        s.src = "hocoslamfy.js";
+        document.body.appendChild(s);
+
+        // Clean up
+        var boostBtn = document.getElementById("boost-btn");
+        boostBtn.textContent = "FLY";
+        boostBtn.removeEventListener("mousedown", startWasm);
+        boostBtn.removeEventListener("touchstart", startWasm, { passive: true });
+        var canvas = document.getElementById("canvas");
+        canvas.removeEventListener("mousedown", startWasm);
+        canvas.removeEventListener("touchstart", startWasm, { passive: true });
+      }
+
+      var canvas = document.getElementById("canvas");
+      canvas.addEventListener("mousedown", startWasm);
+      canvas.addEventListener("touchstart", startWasm, { passive: true });
+
+      var boostBtn = document.getElementById("boost-btn");
+      boostBtn.addEventListener("mousedown", startWasm);
+      boostBtn.addEventListener("touchstart", startWasm, { passive: true });
+    </script>
   </body>
 </html>

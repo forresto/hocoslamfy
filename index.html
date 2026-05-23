@@ -26,11 +26,11 @@
     #canvas {
       display: block;
       border: 2px solid #30363d;
-      width: 640px;
-      height: 480px;
-      max-width: 100%;
+      width: min(640px, 100%);
+      aspect-ratio: 4 / 3;
       image-rendering: pixelated;
       image-rendering: crisp-edges;
+      cursor: pointer;
     }
 
     #controls {
@@ -162,6 +162,14 @@
         btn.addEventListener('touchstart',  down, { passive: false });
         btn.addEventListener('touchend',    up,   { passive: false });
         btn.addEventListener('touchcancel', up);
+
+        // canvas taps
+        var canvas = document.getElementById('canvas');
+        canvas.addEventListener('mousedown', function() { boostDown(); });
+        canvas.addEventListener('mouseup',   function() { boostUp(); });
+        canvas.addEventListener('touchstart',  function(e) { e.preventDefault(); boostDown(); }, { passive: false });
+        canvas.addEventListener('touchend',    function(e) { e.preventDefault(); boostUp(); },   { passive: false });
+        canvas.addEventListener('touchcancel', function()  { boostUp(); });
 
         // generic segmented control handler
         function makeGroup(id, onChange) {

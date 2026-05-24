@@ -4,8 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
     <title>Hocoslamfy 🐝 wasm (web version)</title>
-    <link rel="icon" type="image/png" href="./data/hocoslamfy.png" />
-    <meta property="og:image" content="./data-src/hocoslamfy-start-screen.png" />
+    <link rel="icon" type="image/png" href="./hocoslamfy.png" />
+    <meta property="og:image" content="./hocoslamfy-start-screen.png" />
     <meta
       property="description"
       content="You are a small bee and you must fly to avoid the bamboo shoots! Original by Nebuleon. Now on the web."
@@ -269,7 +269,7 @@
     </script>
     <script>
       var splashImg = new Image();
-      splashImg.src = "data-src/hocoslamfy-start-screen.png";
+      splashImg.src = "./hocoslamfy-start-screen.png";
       splashImg.onload = function () {
         var ctx = document.getElementById("canvas").getContext("2d");
         ctx.drawImage(splashImg, 0, 0, 320, 240);
@@ -279,12 +279,17 @@
       function startWasm() {
         if (wasmLoaded) return;
         wasmLoaded = true;
-        document.getElementById("meta").style.display = "flex";
+
+        window.Module = window.Module || {};
+        window.Module.locateFile = function (path) {
+          return "generated/" + path;
+        };
         var s = document.createElement("script");
-        s.src = "hocoslamfy.js";
+        s.src = "./generated/hocoslamfy.js";
         document.body.appendChild(s);
 
         // Clean up
+        document.getElementById("meta").style.display = "flex";
         var boostBtn = document.getElementById("boost-btn");
         boostBtn.textContent = "FLY";
         boostBtn.removeEventListener("mousedown", startWasm);

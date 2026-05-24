@@ -24,8 +24,8 @@ emcc -O2 \
     -s ALLOW_MEMORY_GROWTH=1 \
     -s ENVIRONMENT=web \
     -Wall -Wno-unused-variable \
-    -o hocoslamfy.js \
+    -o web/generated/hocoslamfy.js \
     $SRCS
 
-echo "Build complete: hocoslamfy.js + hocoslamfy.wasm + hocoslamfy.data"
+echo "Build complete to ./web/generated/: hocoslamfy.js + hocoslamfy.wasm + hocoslamfy.data"
 echo "Serve with: npx serve ."
